@@ -44,7 +44,7 @@ async def run_queue():
         item = q.get()
         await hello(item[0], item[1])
         if q.empty():
-            await voice.disconnect()
+            #await voice.disconnect()
 
 
 async def hello(name, channel):
