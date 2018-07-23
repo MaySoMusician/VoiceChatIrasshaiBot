@@ -43,7 +43,7 @@ async def run_queue():
             await asyncio.sleep(1)
         item = q.get()
         await hello(item[0], item[1])
-        if q.empty():
+        #if q.empty():
             #await voice.disconnect()
 
 
