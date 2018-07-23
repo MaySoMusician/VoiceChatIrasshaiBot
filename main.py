@@ -69,9 +69,10 @@ async def join_vc(channel):
     if connecting is None:
         voice = await client.join_voice_channel(channel)
     else:
-        if connecting.channel is channel:
+        if connecting.channel.id is channel.id:
             voice = client.voice_client_in(channel.server)
         else:
+            voice = connecting
             await voice.disconnect()
             voice = await client.join_voice_channel(channel)
 
