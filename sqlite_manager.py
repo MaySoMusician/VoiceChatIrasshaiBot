@@ -99,7 +99,7 @@ class sqlite_manager:
             debug.log('{0} has value'.format(id))
             return row
         else:
-            debug.log('{0} do\'nt has value'.format(id))
+            debug.log('{0} doesn\'t have value'.format(id))
             return (id, 'sumire', 1.0, 1.0, 1.0, 1.0, '{0}さんいらっしゃい')
 
     def has_value(self, id):
