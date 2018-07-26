@@ -27,6 +27,7 @@ async def run_queue():
             await hello(item[0], item[1])
         except Exception as e:
             debug.log('error:type {0} args:{1} message:{2} error:{3}'.format(type(e), e.args, e.message, str(e)))
+            pass
 
 
 
