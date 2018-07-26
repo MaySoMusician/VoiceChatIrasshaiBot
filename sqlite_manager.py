@@ -24,10 +24,12 @@ class sqlite_manager:
             debug.log("set xml {0}".format(id))
             self.delete_voice(id)
             c = self.connection.cursor()
-            if self.has_value(id):
+            if self.has_xml(id):
                 c.execute('update xml set xml=? where id=?', (xml, id))
+                debug.log('update xml')
             else:
                 c.execute('insert into xml (id, xml) values (?, ?)', (id, xml))
+                debug.log('insert xml')
             self.connection.commit()
             return True
         else:
@@ -111,4 +113,10 @@ class sqlite_manager:
     def has_xml(self, id):
         c = self.connection.cursor()
         c.execute('select count(*) from xml where id=?', (id,))
-        return c.fetchall()[0][0] > 0
+
+        if c.fetchall()[0][0] > 0:
+            debug.log("{0} has xml".format(id))
+            return True
+        else:
+            debug.log('{0} doesn\'t have xml'.format(id))
+            return False

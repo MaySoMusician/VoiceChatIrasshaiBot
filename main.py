@@ -34,7 +34,6 @@ async def hello(id, channel):
     global client
     name = (await client.get_user_info(id)).display_name
     if sqlite_manager.has_xml(id):
-        debug.log('{0} has xml'.format(id))
         xml = sqlite_manager.get_xml(id)
     else:
         data = sqlite_manager.get_row(id)
@@ -81,6 +80,8 @@ async def on_ready():
 async def on_voice_state_update(before, after):
     if not is_join_vc(before, after):
         return
+    if after.server.id in settings.ignore_server:
+        return 
     debug.log("join {0}:{1} in {2}:{3}".format(after.name, after.id, after.voice.voice_channel.name,
                                            after.voice.voice_channel.id))
     global q
@@ -103,6 +104,8 @@ def is_join_vc(before, after):
 
 @client.event
 async def on_message(message):
+    if message.server.id in settings.ignore_server:
+        return
     message_text = message.content
     if message_text.startswith('./satoshi'):
         success = False
