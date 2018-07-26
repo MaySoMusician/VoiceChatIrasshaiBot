@@ -19,9 +19,10 @@ class sqlite_manager:
         self.connection.commit()
 
     def set_xml(self, id, xml):
-        debug.log("set xml {0}".format(id))
-        self.delete_voice(id)
+
         if self.api_manager.is_xml(xml):
+            debug.log("set xml {0}".format(id))
+            self.delete_voice(id)
             c = self.connection.cursor()
             if self.has_value(id):
                 c.execute('update xml set xml=? where id=?', (xml, id))

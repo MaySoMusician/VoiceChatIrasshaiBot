@@ -23,7 +23,12 @@ class api_manager:
 
     def is_xml(self, xml):
         response = self.request(xml)
-        return response.content is not None
+        if response.content != b'':
+            debug.log('is_xml')
+            return True
+        else:
+            debug.log('not_xml')
+            return False
 
     def to_xml(self, voice, pitch, range, rate, volume, text):
         return '<?xml version="1.0" encoding="utf-8" ?>' \
