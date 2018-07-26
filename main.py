@@ -81,7 +81,7 @@ async def on_voice_state_update(before, after):
     if not is_join_vc(before, after):
         return
     if after.server.id in settings.ignore_server:
-        return 
+        return
     debug.log("join {0}:{1} in {2}:{3}".format(after.name, after.id, after.voice.voice_channel.name,
                                            after.voice.voice_channel.id))
     global q
@@ -102,9 +102,18 @@ def is_join_vc(before, after):
     return True
 
 
+def AllowChannel (channel):
+    if channel.is_private:
+        return True
+    if not(channel.server.id in settings.ignore_server):
+        return True
+    return False
+
+
 @client.event
 async def on_message(message):
-    if message.server.id in settings.ignore_server:
+
+    if not AllowChannel(message.channel):
         return
     message_text = message.content
     if message_text.startswith('./satoshi'):
