@@ -25,8 +25,9 @@ async def run_queue():
         item = q.get()
         try:
             await hello(item[0], item[1])
-        except:
-            pass
+        except Exception as e:
+            debug.log(e)
+
 
 
 async def hello(id, channel):
