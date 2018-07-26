@@ -138,7 +138,7 @@ async def on_message(message):
                 success = sqlite_manager.set_rate(id, param)
             if var == 'volume' and 0.00 <= param and param <= 2.00:
                 success = sqlite_manager.set_volume(id, param)
-        set_text_r = re.search(r'^./satoshi settext \"(?P<text>(\w|\W)*)\"$', message_text)
+        set_text_r = re.search(r'^./satoshi settext (?P<text>(\w|\W)*)$', message_text)
         if set_text_r:
             text = set_text_r.group('text')
             if len(text) < 256:
@@ -146,7 +146,7 @@ async def on_message(message):
         reset_r = re.match(r'./satoshi reset', message_text)
         if reset_r:
             success = sqlite_manager.reset(id)
-        set_xml_r = re.search(r'^./satoshi setxml "(?P<xml>(\w|\W)*)"$', message_text)
+        set_xml_r = re.search(r'^./satoshi setxml (?P<xml>(\w|\W)*)$', message_text)
         if set_xml_r:
             success = sqlite_manager.set_xml(id, set_xml_r.group('xml'))
 
