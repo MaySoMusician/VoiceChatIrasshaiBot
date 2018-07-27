@@ -61,7 +61,7 @@ async def join_vc(channel):
     global client
     connecting = client.voice_client_in(channel.server)
     if connecting is None:
-        debug.log('join vc {0}:{1}'.format(channel.name,channel.id))
+        debug.log('join vc {0}:{1}'.format(channel.name, channel.id))
         return await client.join_voice_channel(channel)
     else:
         if connecting.channel.id == channel.id:
@@ -75,7 +75,7 @@ async def join_vc(channel):
 @client.event
 async def on_ready():
     debug.log('Logged in as')
-    debug.log('name:{0} id:{1}'.format(client.user.name,client.user.id))
+    debug.log('name:{0} id:{1}'.format(client.user.name, client.user.id))
 
 
 @client.event
@@ -83,7 +83,8 @@ async def on_voice_state_update(before, after):
     if not is_join_vc(before, after):
         return
     if after.server.id == settings.xpc_jp:
-        debug.log("join {0}:{1} in {2}:{3}".format(after.name, after.id, after.voice.voice_channel.name,after.voice.voice_channel.id))
+        debug.log("join {0}:{1} in {2}:{3}".format(after.name, after.id, after.voice.voice_channel.name,
+                                                   after.voice.voice_channel.id))
         global q
         item = (after.id, after.voice.voice_channel)
         q.put(item)
@@ -102,64 +103,70 @@ def is_join_vc(before, after):
     return True
 
 
-def AllowChannel (channel):
+def AllowChannel(channel):
     if channel.is_private:
         return True
-    if not(channel.server.id in settings.ignore_server):
+    if not (channel.server.id in settings.ignore_server):
         return True
     return False
+
 
 def execute_command(message):
     success = False
     message_text = message.content
-    if message_text.startswith('./satoshi'):
-        id = message.author.id
-        set_voice_r = re.search(r'^./satoshi setvoice (?P<name>.*)$', message_text)
-        if set_voice_r:
-            name = set_voice_r.group('name')
-            if name in ['nozomi', 'seiji', 'akari', 'anzu', 'hiroshi', 'kaho', 'koutarou', 'maki', 'nanako', 'osamu',
-                        'sumire']:
-                success = sqlite_manager.set_voice(id, name)
-        set_prosody_r = re.search(
-            r'^./satoshi set(?P<var>(pitch|range|rate|volume)) (?P<param>([0-9](\.[0-9]{1,2})?))$', message_text)
-        if set_prosody_r:
-            var = set_prosody_r.group('var')
-            param = float(set_prosody_r.group('param'))
-            if var == 'pitch' and 0.50 <= param and param <= 2.00:
-                success = sqlite_manager.set_pitch(id, param)
-            if var == 'range' and 0.00 <= param and param <= 2.00:
-                success = sqlite_manager.set_range(id, param)
-            if var == 'rate' and 0.50 <= param and param <= 4.00:
-                success = sqlite_manager.set_rate(id, param)
-            if var == 'volume' and 0.00 <= param and param <= 2.00:
-                success = sqlite_manager.set_volume(id, param)
-        set_text_r = re.search(r'^./satoshi settext (?P<text>(\w|\W)*)$', message_text)
-        if set_text_r:
-            text = set_text_r.group('text')
-            if len(text) < 256:
-                success = sqlite_manager.set_text(id, text)
-        reset_r = re.match(r'./satoshi reset', message_text)
-        if reset_r:
-            success = sqlite_manager.reset(id)
-        set_xml_r = re.search(r'^./satoshi setxml (?P<xml>(\w|\W)*)$', message_text)
-        if set_xml_r:
-            success = sqlite_manager.set_xml(id, set_xml_r.group('xml'))
+    id = message.author.id
+    set_voice_r = re.search(r'^./satoshi setvoice (?P<name>.*)$', message_text)
+    if set_voice_r:
+        name = set_voice_r.group('name')
+        if name in ['nozomi', 'seiji', 'akari', 'anzu', 'hiroshi', 'kaho', 'koutarou', 'maki', 'nanako', 'osamu',
+                    'sumire']:
+            success = sqlite_manager.set_voice(id, name)
+    set_prosody_r = re.search(
+        r'^./satoshi set(?P<var>(pitch|range|rate|volume)) (?P<param>([0-9](\.[0-9]{1,2})?))$', message_text)
+    if set_prosody_r:
+        var = set_prosody_r.group('var')
+        param = float(set_prosody_r.group('param'))
+        if var == 'pitch' and 0.50 <= param and param <= 2.00:
+            success = sqlite_manager.set_pitch(id, param)
+        if var == 'range' and 0.00 <= param and param <= 2.00:
+            success = sqlite_manager.set_range(id, param)
+        if var == 'rate' and 0.50 <= param and param <= 4.00:
+            success = sqlite_manager.set_rate(id, param)
+        if var == 'volume' and 0.00 <= param and param <= 2.00:
+            success = sqlite_manager.set_volume(id, param)
+    set_text_r = re.search(r'^./satoshi settext (?P<text>(\w|\W)*)$', message_text)
+    if set_text_r:
+        text = set_text_r.group('text')
+        if len(text) < 256:
+            success = sqlite_manager.set_text(id, text)
+    reset_r = re.match(r'./satoshi reset', message_text)
+    if reset_r:
+        success = sqlite_manager.reset(id)
+    set_xml_r = re.search(r'^./satoshi setxml (?P<xml>(\w|\W)*)$', message_text)
+    if set_xml_r:
+        success = sqlite_manager.set_xml(id, set_xml_r.group('xml'))
     return success
+
 
 @client.event
 async def on_message(message):
     if message.channel.is_private:
-       success =  execute_command()
-       if success:
-           debug.log('receive_command {0}'.format(message.content))
-           await client.add_reaction(message, '✅')
+        # for directmessage
+        if message.content.startswith('./satoshi'):
+            success = execute_command(message)
+            if success:
+                debug.log('receive_command {0} name:{1}'.format(message.content, message.author.name))
+                await client.add_reaction(message, '✅')
+        return
+
     if message.channel.server.id == settings.xpc_jp:
-        execute_command()
-        if success:
-            debug.log('receive_command {0}'.format(message.content))
-            await client.add_reaction(message, '✅')
-
-
+        # for xpc-jp
+        if message.content.startswith('./satoshi'):
+            success = execute_command(message)
+            if success:
+                debug.log('receive_command {0} name:{1}'.format(message.content, message.author.name))
+                await client.add_reaction(message, '✅')
+        return
 
 
 loop = asyncio.get_event_loop()

@@ -60,5 +60,5 @@ fabric.properties
 .idea/httpRequests
 
 /data/
-/_pycache_/
+/__pycache__/
 
