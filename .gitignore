@@ -59,9 +59,6 @@ fabric.properties
 # Editor-based Rest Client
 .idea/httpRequests
 
-/settings.py
-/voiceroid.db
-/debug.log
-/rawfile.raw
-/wavfile.wav
+/data/
+/_pycache_/
 

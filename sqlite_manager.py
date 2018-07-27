@@ -4,7 +4,7 @@ import debug
 class sqlite_manager:
 
     def __init__(self, api_manager):
-        self.dbname = "voiceroid.db"
+        self.dbname = "data/voiceroid.db"
         self.connection = sqlite3.connect(self.dbname)
         self.create_table()
         self.api_manager = api_manager

@@ -14,6 +14,8 @@ q = queue.Queue()
 api_manager = api_manager.api_manager()
 sqlite_manager = sqlite_manager.sqlite_manager(api_manager)
 
+settings.reload_setting()
+
 
 async def run_queue():
     global q
@@ -47,7 +49,7 @@ async def hello(id, channel):
     api_manager.download(xml)
     voice = await join_vc(channel)
     debug.log("load wav")
-    player = voice.create_ffmpeg_player('wavfile.wav')
+    player = voice.create_ffmpeg_player('data/wavfile.wav')
     debug.log("start")
     player.start()
     while not player.is_done():
@@ -80,13 +82,11 @@ async def on_ready():
 async def on_voice_state_update(before, after):
     if not is_join_vc(before, after):
         return
-    if after.server.id in settings.ignore_server:
-        return
-    debug.log("join {0}:{1} in {2}:{3}".format(after.name, after.id, after.voice.voice_channel.name,
-                                           after.voice.voice_channel.id))
-    global q
-    item = (after.id, after.voice.voice_channel)
-    q.put(item)
+    if after.server.id == settings.xpc_jp:
+        debug.log("join {0}:{1} in {2}:{3}".format(after.name, after.id, after.voice.voice_channel.name,after.voice.voice_channel.id))
+        global q
+        item = (after.id, after.voice.voice_channel)
+        q.put(item)
 
 
 def is_join_vc(before, after):
@@ -109,15 +109,10 @@ def AllowChannel (channel):
         return True
     return False
 
-
-@client.event
-async def on_message(message):
-
-    if not AllowChannel(message.channel):
-        return
+def execute_command(message):
+    success = False
     message_text = message.content
     if message_text.startswith('./satoshi'):
-        success = False
         id = message.author.id
         set_voice_r = re.search(r'^./satoshi setvoice (?P<name>.*)$', message_text)
         if set_voice_r:
@@ -149,10 +144,22 @@ async def on_message(message):
         set_xml_r = re.search(r'^./satoshi setxml (?P<xml>(\w|\W)*)$', message_text)
         if set_xml_r:
             success = sqlite_manager.set_xml(id, set_xml_r.group('xml'))
+    return success
 
+@client.event
+async def on_message(message):
+    if message.channel.is_private:
+       success =  execute_command()
+       if success:
+           debug.log('receive_command {0}'.format(message.content))
+           await client.add_reaction(message, '✅')
+    if message.channel.server.id == settings.xpc_jp:
+        execute_command()
         if success:
-            debug.log('receive_command {0}'.format(message_text))
+            debug.log('receive_command {0}'.format(message.content))
             await client.add_reaction(message, '✅')
+
+
 
 
 loop = asyncio.get_event_loop()

@@ -15,10 +15,10 @@ class api_manager:
     def download(self, xml):
         debug.log("downloading")
         response = self.request(xml)
-        fp = open('rawfile.raw', 'wb')
+        fp = open('data/rawfile.raw', 'wb')
         fp.write(response.content)
         fp.close()
-        cmd = 'sox -t raw -r 16k -e signed -b 16 -B -c 1  rawfile.raw wavfile.wav'
+        cmd = 'sox -t raw -r 16k -e signed -b 16 -B -c 1  data/rawfile.raw data/wavfile.wav'
         subprocess.check_output(cmd, shell=True)
 
     def is_xml(self, xml):
