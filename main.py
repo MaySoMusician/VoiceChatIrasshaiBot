@@ -115,14 +115,14 @@ def execute_command(message):
     success = False
     message_text = message.content
     id = message.author.id
-    set_voice_r = re.search(r'^./satoshi setvoice (?P<name>.*)$', message_text)
+    set_voice_r = re.search(r'^\./satoshi setvoice (?P<name>.*)$', message_text)
     if set_voice_r:
         name = set_voice_r.group('name')
         if name in ['nozomi', 'seiji', 'akari', 'anzu', 'hiroshi', 'kaho', 'koutarou', 'maki', 'nanako', 'osamu',
                     'sumire']:
             success = sqlite_manager.set_voice(id, name)
     set_prosody_r = re.search(
-        r'^./satoshi set(?P<var>(pitch|range|rate|volume)) (?P<param>([0-9](\.[0-9]{1,2})?))$', message_text)
+        r'^\./satoshi set(?P<var>(pitch|range|rate|volume)) (?P<param>([0-9](\.[0-9]{1,2})?))$', message_text)
     if set_prosody_r:
         var = set_prosody_r.group('var')
         param = float(set_prosody_r.group('param'))
@@ -134,15 +134,15 @@ def execute_command(message):
             success = sqlite_manager.set_rate(id, param)
         if var == 'volume' and 0.00 <= param and param <= 2.00:
             success = sqlite_manager.set_volume(id, param)
-    set_text_r = re.search(r'^./satoshi settext (?P<text>(\w|\W)*)$', message_text)
+    set_text_r = re.search(r'^\./satoshi settext (?P<text>(\w|\W)*)$', message_text)
     if set_text_r:
         text = set_text_r.group('text')
         if len(text) < 256:
             success = sqlite_manager.set_text(id, text)
-    reset_r = re.match(r'./satoshi reset', message_text)
+    reset_r = re.match(r'\./satoshi reset', message_text)
     if reset_r:
         success = sqlite_manager.reset(id)
-    set_xml_r = re.search(r'^./satoshi setxml (?P<xml>(\w|\W)*)$', message_text)
+    set_xml_r = re.search(r'^\./satoshi setxml (?P<xml>(\w|\W)*)$', message_text)
     if set_xml_r:
         success = sqlite_manager.set_xml(id, set_xml_r.group('xml'))
     return success
