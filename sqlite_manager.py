@@ -1,19 +1,21 @@
 import sqlite3
 import debug
+import settings
 
 class sqlite_manager:
 
-    def __init__(self, api_manager):
+    def __init__(self, api_manager, client):
         self.dbname = "data/voiceroid.db"
         self.connection = sqlite3.connect(self.dbname)
         self.create_table()
         self.api_manager = api_manager
+        self.discord_client = client
 
     def create_table(self):
         cursor = self.connection.cursor()
         debug.log('create voice')
         cursor.execute(
-            'create table if not exists voice (id tinytext, voice tinytext default "sumire", pitch decimal default 1.0, range decimal default 1.0, rate decimal default 1.0, volume decimal default 1.0, txt text default "{0}さんいらっしゃい")')
+            'create table if not exists voice (id tinytext, voice tinytext default "sumire", pitch decimal default 1.0, range decimal default 1.0, rate decimal default 1.0, volume decimal default 1.0, txt text)')
         cursor.execute('create table if not exists xml (id tinytext, xml text)')
         debug.log('create xml')
         self.connection.commit()
@@ -69,6 +71,7 @@ class sqlite_manager:
         debug.log("reset db {0}".format(id))
         self.delete_voice(id)
         self.delete_xml(id)
+        self.set_default(id)
         return True
 
     def delete_voice(self, id):
@@ -93,17 +96,24 @@ class sqlite_manager:
             c.execute('insert into voice (id, {0}) values (?, ?)'.format(column_name), (id, value))
         self.connection.commit()
 
+    def set_default(self, id):
+        xpc_jp = self.discord_client.get_server(settings.xpc_jp)
+        user = xpc_jp.get_member(id)
+        self.set_text(id, '{0}さんいらっしゃい'.format(user.name))
+
 
     def get_row(self, id):
-        if self.has_value(id):
-            c = self.connection.cursor()
-            c.execute('select * from voice where id=?', (id,))
-            row = c.fetchmany(1)[0]
-            debug.log('{0} has value'.format(id))
-            return row
-        else:
+        if not self.has_value(id):
             debug.log('{0} doesn\'t have value'.format(id))
-            return (id, 'sumire', 1.0, 1.0, 1.0, 1.0, '{0}さんいらっしゃい')
+            self.set_default(id)
+
+
+        c = self.connection.cursor()
+        c.execute('select * from voice where id=?', (id,))
+        row = c.fetchmany(1)[0]
+        debug.log('{0} has value'.format(id))
+        return row
+
 
     def has_value(self, id):
         c = self.connection.cursor()
