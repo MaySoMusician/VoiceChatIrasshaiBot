@@ -21,7 +21,8 @@ class sqlite_manager:
         self.connection.commit()
 
     def set_xml(self, id, xml):
-
+        if len(xml) > 512:
+            return False
         if self.api_manager.is_xml(xml):
             debug.log("set xml {0}".format(id))
             self.delete_voice(id)

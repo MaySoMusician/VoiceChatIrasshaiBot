@@ -202,6 +202,8 @@ async def get_value(user, channel):
 
 
 def say(user_id, channel, text):
+    if len(text) > 255:
+        return False
     if channel.id not in settings.freetalk_text_vc:
         return False
     global sqlite_manager
