@@ -21,8 +21,6 @@ class sqlite_manager:
         self.connection.commit()
 
     def set_xml(self, id, xml):
-        if len(xml) > 512:
-            return False
         if self.api_manager.is_xml(xml):
             debug.log("set xml {0}".format(id))
             self.delete_voice(id)
@@ -34,9 +32,6 @@ class sqlite_manager:
                 c.execute('insert into xml (id, xml) values (?, ?)', (id, xml))
                 debug.log('insert xml')
             self.connection.commit()
-            return True
-        else:
-            return False
 
     def get_xml(self, id):
         c = self.connection.cursor()
@@ -46,34 +41,27 @@ class sqlite_manager:
 
     def set_voice(self, id, param):
         self.set_value(id, 'voice', param)
-        return True
 
     def set_rate(self, id, param):
         self.set_value(id, 'rate', param)
-        return True
 
     def set_range(self, id, param):
         self.set_value(id, 'range', param)
-        return True
 
     def set_pitch(self, id, param):
         self.set_value(id, 'pitch', param)
-        return True
 
     def set_volume(self, id, param):
         self.set_value(id, 'volume', param)
-        return True
 
     def set_text(self, id, param):
         self.set_value(id, 'txt', param)
-        return True
 
     def reset(self, id):
         debug.log("reset db {0}".format(id))
         self.delete_voice(id)
         self.delete_xml(id)
         self.set_default(id)
-        return True
 
     def delete_voice(self, id):
         debug.log("delete voice {0}".format(id))
