@@ -24,19 +24,18 @@ class Program(discord.Client):
 
         while True:
             count = 0
-            if self.queue.empty():
+            while self.queue.empty():
                 await asyncio.sleep(1)
                 count += 1
-                if count > 5:
+                if count > 3600:
                     if self.is_voice_connected(self.xpc_jp):
                         voice = self.voice_client_in(self.xpc_jp)
                         await voice.disconnect()
-            else:
-                item = self.queue.get()
-                try:
-                    await self.speak(item[0], item[1])
-                except Exception as e:
-                    debug.log(e)
+            item = self.queue.get()
+            try:
+                await self.speak(item[0], item[1])
+            except Exception as e:
+                debug.log(e)
 
     async def speak(self, xml, channel):
         self.api_manager.download(xml)
