@@ -139,7 +139,7 @@ class Program(discord.Client):
         self.queue.put(item)
         return True
 
-    def get_vc_setting(self, user, channel):
+    async def get_vc_setting(self, user, channel):
         if self.sqlite_manager.has_xml(user.id):
             message = '現在の{0}さんの設定です\n' \
                       '```asciidoc\n' \
@@ -162,10 +162,10 @@ class Program(discord.Client):
                       'volume:: {5}\n' \
                       'text:: {6}\n' \
                       '```'.format(user.mention, voice, pitch, range, rate, volume, text)
-        yield from self.send_message(channel, message)
+        await self.send_message(channel, message)
         return True
 
-    def execute_command(self, message):
+    async def execute_command(self, message):
         success = False
         message_text = message.content
         user_id = message.author.id
@@ -191,29 +191,29 @@ class Program(discord.Client):
             elif var == 'volume':
                 success = self.set_volume(user_id, param)
 
-        set_text_r = re.search(r'^\./satoshi *settext (?P<text>(\w|\W)*)$', message_text)
+        set_text_r = re.search(r'^\./satoshi +settext (?P<text>(\w|\W)*)$', message_text)
         if set_text_r:
             text = set_text_r.group('text')
             success = self.set_text(user_id, text)
 
-        reset_r = re.match(r'^\./satoshi reset$', message_text)
+        reset_r = re.match(r'^\./satoshi +reset$', message_text)
         if reset_r:
             success = self.reset(user_id)
 
-        set_xml_r = re.search(r'^\./satoshi setxml (?P<xml>(\w|\W)*)$', message_text)
-        if set_text_r:
+        set_xml_r = re.search(r'^\./satoshi +setxml (?P<xml>(\w|\W)*)$', message_text)
+        if set_xml_r:
             success = self.set_xml(user_id, set_xml_r.group('xml'))
 
-        say_r = re.search(r'^\./satoshi say (?P<text>(\w|\W)*)$', message_text)
+        say_r = re.search(r'^\./satoshi +say (?P<text>(\w|\W)*)$', message_text)
         if say_r:
             success = self.say(user_id, say_r.group('text'), message.channel)
 
-        get_value_r = re.match(r'^\./satoshi getvcsetting$', message_text)
+        get_value_r = re.match(r'^\./satoshi +getvcsetting$', message_text)
         if get_value_r:
-            success = self.get_vc_setting(message.author, message.channel)
+            success = await self.get_vc_setting(message.author, message.channel)
 
         if success:
-            yield from self.add_reaction(message, '✅')
+            await self.add_reaction(message, '✅')
 
     @asyncio.coroutine
     def on_voice_state_update(self, before, after):
