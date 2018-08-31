@@ -113,11 +113,19 @@ class Program(discord.Client):
         else:
             return False
 
-    def say(self, user_id, text, channel):
+    def say(self, user, text, channel):
+        user_id = user.id
         if len(text) >= 255:
             return False
-        if channel.id not in settings.freetalk_text_vc:
-            return False
+        
+        if channel.id in settings.freetalk_text_vc:
+            vc_id = settings.freetalk_text_vc[channel.id]
+        else:
+            if user.voice.voice_channel is not None:
+                vc_id = user.voice.voice_channel.id
+            else:
+                return False
+        
         if self.sqlite_manager.has_value(user_id):
             row = self.sqlite_manager.get_row(user_id)
             voice = row[1]
@@ -132,7 +140,6 @@ class Program(discord.Client):
             rate = 1
             volume = 1
         xml = self.api_manager.to_xml(voice, pitch, range, rate, volume, text)
-        vc_id = settings.freetalk_text_vc[channel.id]
         vc = self.get_channel(vc_id)
         item = (xml, vc)
         self.queue.put(item)
@@ -205,7 +212,7 @@ class Program(discord.Client):
 
         say_r = re.search(r'^\./satoshi +say (?P<text>(\w|\W)*)$', message_text)
         if say_r:
-            success = self.say(user_id, say_r.group('text'), message.channel)
+            success = self.say(message.author, say_r.group('text'), message.channel)
 
         get_value_r = re.match(r'^\./satoshi +getvcsetting$', message_text)
         if get_value_r:
